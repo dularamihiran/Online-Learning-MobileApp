@@ -23,6 +23,8 @@ app.use("/api/courses", require("./routes/courseRoutes"));
 
 app.use("/api/enrollments", require("./routes/enrollmentRoutes"));
 
+app.use("/api/gpt", require("./routes/gptRoutes"));
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
