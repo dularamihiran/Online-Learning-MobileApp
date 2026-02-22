@@ -4,7 +4,8 @@ const {
   getAllCourses,
   getInstructorCourses,
   updateCourse,
-  deleteCourse
+  deleteCourse,
+  getInstructorStats
 } = require("../controllers/courseController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -15,6 +16,7 @@ const router = express.Router();
 router.post("/", protect, roleCheck("instructor"), createCourse);
 router.get("/", protect, getAllCourses);
 router.get("/my", protect, roleCheck("instructor"), getInstructorCourses);
+router.get("/stats", protect, roleCheck("instructor"), getInstructorStats);
 router.put("/:id", protect, roleCheck("instructor"), updateCourse);
 router.delete("/:id", protect, roleCheck("instructor"), deleteCourse);
 

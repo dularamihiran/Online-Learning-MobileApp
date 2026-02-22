@@ -1,12 +1,30 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '@/context/AuthContext';
+import api from '@/api/api';
 
 export default function InstructorDashboard() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
+  const [stats, setStats] = useState({ totalCourses: 0, totalStudents: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/courses/stats');
+      setStats(response.data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const quickActions = [
     {
@@ -81,29 +99,28 @@ export default function InstructorDashboard() {
       {/* Stats Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Teaching Stats</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="library" size={24} color="#0ea5e9" />
-            </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Courses</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0ea5e9" />
           </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
-              <Ionicons name="people" size={24} color="#10b981" />
+        ) : (
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
+                <Ionicons name="library" size={24} color="#0ea5e9" />
+              </View>
+              <Text style={styles.statValue}>{stats.totalCourses}</Text>
+              <Text style={styles.statLabel}>Courses</Text>
             </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Students</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="star" size={24} color="#f59e0b" />
+            <View style={styles.statCard}>
+              <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
+                <Ionicons name="people" size={24} color="#10b981" />
+              </View>
+              <Text style={styles.statValue}>{stats.totalStudents}</Text>
+              <Text style={styles.statLabel}>Students</Text>
             </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
           </View>
-        </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -202,6 +219,11 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     gap: 12,
+  },
+  loadingContainer: {
+    padding: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statCard: {
     flex: 1,
