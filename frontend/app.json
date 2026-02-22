@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Online Learning",
+    "slug": "online-learning",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "online-learning",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.onlinelearning.app"
+    },
+    "android": {
+      "package": "com.onlinelearning.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#2563eb"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
