@@ -5,6 +5,12 @@ exports.enrollCourse = async (req, res) => {
   try {
     const { courseId } = req.body;
 
+    console.log('Enroll request:', { courseId, student: req.user?._id });
+
+    if (!courseId) {
+      return res.status(400).json({ message: "Course ID is required" });
+    }
+
     const alreadyEnrolled = await Enrollment.findOne({
       student: req.user._id,
       course: courseId
@@ -19,12 +25,15 @@ exports.enrollCourse = async (req, res) => {
       course: courseId
     });
 
+    console.log('Enrollment successful:', enrollment);
+
     res.status(201).json({
       message: "Enrollment successful",
       enrollment
     });
 
   } catch (error) {
+    console.error('Enrollment error:', error);
     res.status(500).json({ message: error.message });
   }
 };

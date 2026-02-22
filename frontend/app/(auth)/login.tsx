@@ -9,7 +9,6 @@
 
 import { useState, useContext } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   View, 
   Text, 
@@ -74,19 +73,22 @@ export default function Login() {
 
       // Handle both old and new backend response formats
       if (response.data.success || response.data.token) {
-        const { token, role } = response.data;
+        const { token, _id, name, email, role } = response.data;
         
         if (!token || !role) {
           Alert.alert('Error', 'Invalid response from server');
           return;
         }
         
-        // Save token and role in AsyncStorage
-        await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('userRole', role);
+        const userData = {
+          _id,
+          name,
+          email,
+          role
+        };
         
-        // Update auth context
-        await login(token, role);
+        // Update auth context (this will handle AsyncStorage)
+        await login({ token, user: userData });
         
         console.log('Navigating to dashboard for role:', role);
         

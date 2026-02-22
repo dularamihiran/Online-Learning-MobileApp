@@ -10,25 +10,32 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+type UserType = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "student" | "instructor";
+};
+
 type AuthContextType = {
+  user: UserType | null;
   token: string | null;
-  role: string | null;
-  login: (token: string, role: string) => Promise<void>;
-  logout: () => Promise<void>;
   loading: boolean;
+  login: (data: any) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType>({
+  user: null,
   token: null,
-  role: null,
+  loading: true,
   login: async () => {},
   logout: async () => {},
-  loading: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<UserType | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,9 +45,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadAuth = async () => {
     try {
       const storedToken = await AsyncStorage.getItem('userToken');
-      const storedRole = await AsyncStorage.getItem('userRole');
+      const storedUser = await AsyncStorage.getItem('user');
       setToken(storedToken);
-      setRole(storedRole);
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
     } catch (error) {
       console.error('Error loading auth:', error);
     } finally {
@@ -48,22 +57,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (newToken: string, newRole: string) => {
-    await AsyncStorage.setItem('userToken', newToken);
-    await AsyncStorage.setItem('userRole', newRole);
-    setToken(newToken);
-    setRole(newRole);
+  const login = async (data: any) => {
+    await AsyncStorage.setItem('userToken', data.token);
+    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    setToken(data.token);
+    setUser(data.user);
   };
 
   const logout = async () => {
     await AsyncStorage.removeItem('userToken');
-    await AsyncStorage.removeItem('userRole');
+    await AsyncStorage.removeItem('user');
     setToken(null);
-    setRole(null);
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, role, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
