@@ -43,6 +43,9 @@ export default function ChatGPTSuggestions() {
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
   const [enrolling, setEnrolling] = useState<string | null>(null);
 
+  // Debug log
+  console.log('Current recommended courses:', recommendedCourses.length);
+
   // Enroll in a course
   const handleEnroll = async (courseId: string) => {
     setEnrolling(courseId);
@@ -76,6 +79,8 @@ export default function ChatGPTSuggestions() {
       console.log('Sending prompt to GPT:', promptText);
       const res = await API.post('/gpt/ask', { prompt: promptText });
       console.log('GPT response:', res.data);
+      console.log('Courses in response:', res.data.courses);
+      console.log('Number of courses:', res.data.courses?.length);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -87,8 +92,10 @@ export default function ChatGPTSuggestions() {
       
       // Set recommended courses from backend response (filtered by prompt keywords)
       if (res.data.courses && res.data.courses.length > 0) {
+        console.log('Setting recommended courses:', res.data.courses);
         setRecommendedCourses(res.data.courses);
       } else {
+        console.log('No courses found in response');
         // No matching courses found
         setRecommendedCourses([]);
         const noCourseMessage: Message = {
@@ -159,6 +166,11 @@ export default function ChatGPTSuggestions() {
             <Text style={styles.loadingText}>Thinking...</Text>
           </View>
         )}
+
+        {/* Debug Info */}
+        <View style={{ padding: 10, backgroundColor: '#f0f0f0', margin: 10 }}>
+          <Text>Debug: Courses Count = {recommendedCourses.length}</Text>
+        </View>
 
         {/* Recommended Courses Section */}
         {recommendedCourses.length > 0 && (

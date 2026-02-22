@@ -9,6 +9,13 @@ exports.getCourseSuggestions = async (req, res) => {
   try {
     const { prompt } = req.body;
 
+    console.log('===== GPT Request =====');
+    console.log('Prompt:', prompt);
+
+    // Check total courses in database
+    const totalCourses = await Course.countDocuments();
+    console.log('Total courses in database:', totalCourses);
+
     // Get AI response
     const completion = await client.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -27,6 +34,7 @@ exports.getCourseSuggestions = async (req, res) => {
     });
 
     const aiReply = completion.choices[0].message.content;
+    console.log('AI Reply:', aiReply);
 
     // Search for relevant courses based on keywords in the prompt
     // Extract keywords (simple approach: split by spaces and filter common words)
@@ -61,7 +69,12 @@ exports.getCourseSuggestions = async (req, res) => {
       relevantCourses = await Course.find()
         .populate('instructor', 'name email')
         .limit(5);
+      console.log('Fallback courses:', relevantCourses.length);
     }
+
+    console.log('===== Response =====');
+    console.log('Courses to send:', relevantCourses.length);
+    console.log('Course titles:', relevantCourses.map(c => c.title));
 
     res.json({
       reply: aiReply,

@@ -81,12 +81,19 @@ export default function AllCourses() {
     );
   }
 
-  if (courses.length === 0) {
+  // Filter out enrolled courses
+  const availableCourses = courses.filter(course => !enrolledCourseIds.includes(course._id));
+
+  if (availableCourses.length === 0) {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.emptyEmoji}>📚</Text>
-        <Text style={styles.emptyTitle}>No Courses Available</Text>
-        <Text style={styles.emptyText}>Check back later for new courses!</Text>
+        <Text style={styles.emptyTitle}>No Available Courses</Text>
+        <Text style={styles.emptyText}>
+          {courses.length > 0 
+            ? "You're enrolled in all available courses!" 
+            : "Check back later for new courses!"}
+        </Text>
       </View>
     );
   }
@@ -94,14 +101,13 @@ export default function AllCourses() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={courses}
+        data={availableCourses}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7c3aed"]} />
         }
         renderItem={({ item }) => {
-          const isEnrolled = enrolledCourseIds.includes(item._id);
           const isEnrolling = enrolling === item._id;
 
           return (
@@ -124,14 +130,13 @@ export default function AllCourses() {
               <TouchableOpacity
                 style={[
                   styles.enrollButton,
-                  isEnrolled && styles.enrolledButton,
                   isEnrolling && styles.enrollingButton,
                 ]}
                 onPress={() => handleEnroll(item._id)}
-                disabled={isEnrolled || isEnrolling}
+                disabled={isEnrolling}
               >
                 <Text style={styles.enrollButtonText}>
-                  {isEnrolling ? '⏳ Enrolling...' : isEnrolled ? '✓ Enrolled' : '✓ Enroll Now'}
+                  {isEnrolling ? '⏳ Enrolling...' : '✓ Enroll Now'}
                 </Text>
               </TouchableOpacity>
             </View>
