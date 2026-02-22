@@ -30,28 +30,37 @@ exports.getCourseSuggestions = async (req, res) => {
 
     // Search for relevant courses based on keywords in the prompt
     // Extract keywords (simple approach: split by spaces and filter common words)
-    const commonWords = ['i', 'want', 'to', 'learn', 'need', 'course', 'about', 'on', 'in', 'a', 'an', 'the', 'for', 'how', 'what', 'is', 'am', 'can', 'you', 'me', 'my'];
+    const commonWords = ['i', 'want', 'to', 'learn', 'need', 'course', 'about', 'on', 'in', 'a', 'an', 'the', 'for', 'how', 'what', 'is', 'am', 'can', 'you', 'me', 'my', 'some', 'any', 'with', 'find', 'show', 'get'];
     const keywords = prompt
       .toLowerCase()
       .replace(/[^\w\s]/g, '') // Remove punctuation
       .split(/\s+/)
       .filter(word => word.length > 2 && !commonWords.includes(word));
 
+    console.log('Extracted keywords:', keywords);
+
     // Search courses that match any keyword in title, description, or content
     let relevantCourses = [];
     if (keywords.length > 0) {
-      // Create regex patterns for each keyword
-      const regexQueries = keywords.map(keyword => ({
-        $or: [
-          { title: { $regex: keyword, $options: 'i' } },
-          { description: { $regex: keyword, $options: 'i' } },
-          { content: { $regex: keyword, $options: 'i' } }
-        ]
-      }));
+      // Build a single regex pattern from all keywords (OR logic)
+      const keywordPattern = keywords.join('|');
+      console.log('Search pattern:', keywordPattern);
 
       relevantCourses = await Course.find({
-        $or: regexQueries
+        $or: [
+          { title: { $regex: keywordPattern, $options: 'i' } },
+          { description: { $regex: keywordPattern, $options: 'i' } },
+          { content: { $regex: keywordPattern, $options: 'i' } }
+        ]
       }).populate('instructor', 'name email').limit(10);
+
+      console.log('Found courses:', relevantCourses.length);
+    } else {
+      // If no specific keywords, return top 5 courses as general suggestions
+      console.log('No keywords extracted, returning top courses');
+      relevantCourses = await Course.find()
+        .populate('instructor', 'name email')
+        .limit(5);
     }
 
     res.json({
