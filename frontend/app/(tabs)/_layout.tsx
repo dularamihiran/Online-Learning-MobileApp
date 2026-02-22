@@ -13,14 +13,14 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>🏠</Text>,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>H</Text>,
         }}
       />
       <Tabs.Screen
         name="courses"
         options={{
           title: 'Courses',
-          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>📚</Text>,
+          tabBarIcon: ({ color }) => <Text style={{ fontSize: 24 }}>C</Text>,
         }}
       />
     </Tabs>

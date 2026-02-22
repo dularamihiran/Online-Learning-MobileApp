@@ -9,7 +9,6 @@ export default function LandingPage() {
     <View style={styles.container}>
       {/* Hero Section */}
       <View style={styles.hero}>
-        <Text style={styles.emoji}>🎓</Text>
         <Text style={styles.title}>AI Learning Platform</Text>
         <Text style={styles.subtitle}>
           Smart course recommendations powered by AI.{'\n'}
@@ -64,10 +63,6 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     marginTop: 40,
-  },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 20,
   },
   title: {
     fontSize: 32,
