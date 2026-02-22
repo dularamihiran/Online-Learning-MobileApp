@@ -10,7 +10,7 @@ import {
   Alert
 } from "react-native";
 import { useEffect, useState, useContext, useCallback } from "react";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import axios from "axios";
 import { AuthContext } from "@/context/AuthContext";
 
@@ -30,13 +30,14 @@ type Student = {
 
 export default function MyCourses() {
   const { token } = useContext(AuthContext);
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -93,7 +94,6 @@ export default function MyCourses() {
       // Backend returns enrollments with student populated
       const studentsData = res.data.map((enrollment: any) => enrollment.student);
       setStudents(studentsData);
-      setSelectedCourse(courseId);
       setModalVisible(true);
     } catch (err: any) {
       console.log('Fetch students error:', err);
@@ -102,6 +102,46 @@ export default function MyCourses() {
     } finally {
       setLoadingStudents(false);
     }
+  };
+
+  const handleEdit = (courseId: string) => {
+    router.push(`/(instructor)/edit-course?id=${courseId}`);
+  };
+
+  const handleDelete = async (courseId: string, courseTitle: string) => {
+    Alert.alert(
+      'Delete Course',
+      `Are you sure you want to delete "${courseTitle}"? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(courseId);
+            try {
+              await axios.delete(
+                `https://online-learning-mobileapp.onrender.com/api/courses/${courseId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              Alert.alert('Success', 'Course deleted successfully');
+              // Remove from local state
+              setCourses(prev => prev.filter(c => c._id !== courseId));
+            } catch (err: any) {
+              console.log('Delete error:', err);
+              console.log('Error response:', err.response?.data);
+              Alert.alert('Error', err.response?.data?.message || 'Failed to delete course');
+            } finally {
+              setDeleting(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (loading) {
@@ -154,15 +194,37 @@ export default function MyCourses() {
                 </Text>
               </View>
             )}
-            <TouchableOpacity
-              style={styles.viewStudentsButton}
-              onPress={() => fetchEnrolledStudents(item._id)}
-              disabled={loadingStudents}
-            >
-              <Text style={styles.viewStudentsButtonText}>
-                {loadingStudents ? 'Loading...' : '👥 View Students'}
-              </Text>
-            </TouchableOpacity>
+            
+            {/* Action Buttons */}
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.viewStudentsButton}
+                onPress={() => fetchEnrolledStudents(item._id)}
+                disabled={loadingStudents}
+              >
+                <Text style={styles.viewStudentsButtonText}>
+                  {loadingStudents ? '...' : '👥'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => handleEdit(item._id)}
+                disabled={deleting === item._id}
+              >
+                <Text style={styles.editButtonText}>✏️ Edit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.deleteButton, deleting === item._id && styles.deleteButtonDisabled]}
+                onPress={() => handleDelete(item._id, item.title)}
+                disabled={deleting === item._id}
+              >
+                <Text style={styles.deleteButtonText}>
+                  {deleting === item._id ? '...' : '🗑️'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -271,12 +333,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardHeader: {
     marginBottom: 8,
@@ -309,18 +371,53 @@ const styles = StyleSheet.create({
     color: "#64748b",
     lineHeight: 20,
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+  },
   viewStudentsButton: {
+    flex: 1,
     backgroundColor: "#4f46e5",
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    marginTop: 12,
     alignItems: "center",
+    justifyContent: 'center',
   },
   viewStudentsButtonText: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: "#10b981",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  editButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  deleteButton: {
+    backgroundColor: "#ef4444",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: 'center',
+    minWidth: 50,
+  },
+  deleteButtonDisabled: {
+    backgroundColor: "#fca5a5",
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontSize: 18,
   },
   // Modal styles
   modalContainer: {

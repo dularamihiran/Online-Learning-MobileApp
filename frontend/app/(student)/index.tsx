@@ -1,69 +1,143 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useContext } from 'react';
-import { useRouter } from 'expo-router';
-import { AuthContext } from '@/context/AuthContext';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { useEffect, useState } from 'react';
+import API from '@/api/api';
 
-export default function StudentDashboard() {
-  const { logout, user } = useContext(AuthContext);
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            // No need to manually navigate, _layout.tsx will handle the redirect
-          },
-        },
-      ]
-    );
+type Course = {
+  _id: string;
+  title: string;
+  description: string;
+  content?: string;
+  instructor: {
+    _id: string;
+    name: string;
   };
+};
+
+export default function AllCourses() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
+  const [enrolling, setEnrolling] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchCourses();
+    fetchEnrolledCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const res = await API.get('/courses');
+      console.log('Courses fetched:', res.data);
+      setCourses(res.data);
+    } catch (err) {
+      console.log('Fetch error:', err);
+      Alert.alert('Error', 'Failed to fetch courses');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const fetchEnrolledCourses = async () => {
+    try {
+      const res = await API.get('/enrollments/my');
+      const enrolledIds = res.data.map((enrollment: any) => enrollment.course._id);
+      setEnrolledCourseIds(enrolledIds);
+    } catch (err) {
+      console.log('Fetch enrolled courses error:', err);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchCourses();
+    fetchEnrolledCourses();
+  };
+
+  const handleEnroll = async (courseId: string) => {
+    setEnrolling(courseId);
+    try {
+      await API.post('/enrollments/enroll', { courseId });
+      Alert.alert('Success', 'Enrolled successfully!');
+      // Add to enrolled list
+      setEnrolledCourseIds(prev => [...prev, courseId]);
+    } catch (err: any) {
+      console.log('Enroll error:', err);
+      console.log('Error response:', err.response?.data);
+      const errorMsg = err.response?.data?.message || 'Enrollment failed';
+      Alert.alert('Error', errorMsg);
+    } finally {
+      setEnrolling(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#7c3aed" />
+        <Text style={styles.loadingText}>Loading courses...</Text>
+      </View>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.emptyEmoji}>📚</Text>
+        <Text style={styles.emptyTitle}>No Courses Available</Text>
+        <Text style={styles.emptyText}>Check back later for new courses!</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.emoji}>🎓</Text>
-        <Text style={styles.title}>Student Dashboard</Text>
-        <Text style={styles.welcome}>Welcome back, {user?.name || 'Student'}!</Text>
-        <Text style={styles.description}>
-          Your learning journey starts here. Access your courses, track progress, and achieve your goals.
-        </Text>
+      <FlatList
+        data={courses}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7c3aed"]} />
+        }
+        renderItem={({ item }) => {
+          const isEnrolled = enrolledCourseIds.includes(item._id);
+          const isEnrolling = enrolling === item._id;
 
-        <View style={styles.navigationContainer}>
-          <TouchableOpacity 
-            style={styles.navButton} 
-            onPress={() => router.push('/(student)/course-list' as any)}
-          >
-            <Text style={styles.navButtonText}>📚 All Courses</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.navButton} 
-            onPress={() => router.push('/(student)/my-courses' as any)}
-          >
-            <Text style={styles.navButtonText}>📖 My Courses</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.navButton} 
-            onPress={() => router.push('/(student)/chatgpt-suggestions' as any)}
-          >
-            <Text style={styles.navButtonText}>✨ Course Suggestions</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+          return (
+            <View style={styles.card}>
+              <View style={styles.courseHeader}>
+                <Text style={styles.courseTitle}>{item.title}</Text>
+                <Text style={styles.courseInstructor}>by {item.instructor.name}</Text>
+              </View>
+              <Text style={styles.description} numberOfLines={3}>
+                {item.description}
+              </Text>
+              {item.content && (
+                <View style={styles.contentContainer}>
+                  <Text style={styles.contentLabel}>📖 Content:</Text>
+                  <Text style={styles.contentText} numberOfLines={2}>
+                    {item.content}
+                  </Text>
+                </View>
+              )}
+              <TouchableOpacity
+                style={[
+                  styles.enrollButton,
+                  isEnrolled && styles.enrolledButton,
+                  isEnrolling && styles.enrollingButton,
+                ]}
+                onPress={() => handleEnroll(item._id)}
+                disabled={isEnrolled || isEnrolling}
+              >
+                <Text style={styles.enrollButtonText}>
+                  {isEnrolling ? '⏳ Enrolling...' : isEnrolled ? '✓ Enrolled' : '✓ Enroll Now'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+      />
     </View>
   );
 }
@@ -72,80 +146,104 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-    justifyContent: 'space-between',
   },
-  content: {
+  centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    padding: 20,
+    backgroundColor: '#f8fafc',
   },
-  emoji: {
-    fontSize: 80,
-    marginBottom: 24,
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#64748b',
   },
-  title: {
-    fontSize: 32,
+  emptyEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#1e293b',
-    marginBottom: 12,
-    textAlign: 'center',
+    marginBottom: 8,
   },
-  welcome: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#2563eb',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  description: {
+  emptyText: {
     fontSize: 16,
     color: '#64748b',
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 400,
-    marginBottom: 32,
   },
-  navigationContainer: {
-    width: '100%',
-    maxWidth: 400,
+  listContent: {
+    padding: 16,
   },
-  navButton: {
-    backgroundColor: '#4f46e5',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+  card: {
+    backgroundColor: '#fff',
+    padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#4f46e5',
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  navButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  courseHeader: {
+    marginBottom: 8,
+  },
+  courseTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 4,
   },
-  buttonContainer: {
-    padding: 24,
+  courseInstructor: {
+    fontSize: 13,
+    color: '#7c3aed',
+    fontWeight: '600',
   },
-  logoutButton: {
-    backgroundColor: '#ef4444',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
+  description: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  contentContainer: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  contentLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#7c3aed',
+    marginBottom: 4,
+  },
+  contentText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  enrollButton: {
+    backgroundColor: '#10b981',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#ef4444',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    marginTop: 8,
   },
-  logoutButtonText: {
+  enrolledButton: {
+    backgroundColor: '#6366f1',
+  },
+  enrollingButton: {
+    backgroundColor: '#86efac',
+  },
+  enrollButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
 });

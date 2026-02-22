@@ -7,7 +7,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useState } from 'react';
 import API from '@/api/api';
@@ -16,6 +17,17 @@ type Message = {
   id: string;
   text: string;
   isUser: boolean;
+};
+
+type Course = {
+  _id: string;
+  title: string;
+  description: string;
+  content?: string;
+  instructor: {
+    _id: string;
+    name: string;
+  };
 };
 
 export default function ChatGPTSuggestions() {
@@ -28,6 +40,23 @@ export default function ChatGPTSuggestions() {
   ]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
+  const [enrolling, setEnrolling] = useState<string | null>(null);
+
+  // Enroll in a course
+  const handleEnroll = async (courseId: string) => {
+    setEnrolling(courseId);
+    try {
+      await API.post('/enrollments/enroll', { courseId });
+      Alert.alert('Success', 'You have successfully enrolled in this course!');
+    } catch (err: any) {
+      console.log('Enroll error:', err);
+      const errorMsg = err.response?.data?.message || 'Failed to enroll. Please try again.';
+      Alert.alert('Error', errorMsg);
+    } finally {
+      setEnrolling(null);
+    }
+  };
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -55,6 +84,20 @@ export default function ChatGPTSuggestions() {
       };
       
       setMessages(prev => [...prev, aiMessage]);
+      
+      // Set recommended courses from backend response (filtered by prompt keywords)
+      if (res.data.courses && res.data.courses.length > 0) {
+        setRecommendedCourses(res.data.courses);
+      } else {
+        // No matching courses found
+        setRecommendedCourses([]);
+        const noCourseMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          text: 'Sorry, I couldn\'t find any courses matching your request in our database. Try asking about other topics!',
+          isUser: false,
+        };
+        setMessages(prev => [...prev, noCourseMessage]);
+      }
     } catch (err: any) {
       console.log('GPT error:', err);
       console.log('GPT error response:', err.response?.data);
@@ -114,6 +157,41 @@ export default function ChatGPTSuggestions() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator color="#4f46e5" />
             <Text style={styles.loadingText}>Thinking...</Text>
+          </View>
+        )}
+
+        {/* Recommended Courses Section */}
+        {recommendedCourses.length > 0 && (
+          <View style={styles.coursesSection}>
+            <Text style={styles.coursesSectionTitle}>📚 Relevant Courses for You</Text>
+            {recommendedCourses.map((course) => (
+              <View key={course._id} style={styles.courseCard}>
+                <View style={styles.courseHeader}>
+                  <Text style={styles.courseTitle}>{course.title}</Text>
+                  <Text style={styles.courseInstructor}>by {course.instructor.name}</Text>
+                </View>
+                <Text style={styles.courseDescription} numberOfLines={3}>
+                  {course.description}
+                </Text>
+                {course.content && (
+                  <Text style={styles.courseContent} numberOfLines={2}>
+                    📖 {course.content}
+                  </Text>
+                )}
+                <TouchableOpacity
+                  style={[
+                    styles.enrollButton,
+                    enrolling === course._id && styles.enrollButtonDisabled,
+                  ]}
+                  onPress={() => handleEnroll(course._id)}
+                  disabled={enrolling === course._id}
+                >
+                  <Text style={styles.enrollButtonText}>
+                    {enrolling === course._id ? 'Enrolling...' : '✓ Enroll Now'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ))}
           </View>
         )}
       </ScrollView>
@@ -232,6 +310,72 @@ const styles = StyleSheet.create({
     backgroundColor: '#a5b4fc',
   },
   sendButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  // Courses section styles
+  coursesSection: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 2,
+    borderTopColor: '#e2e8f0',
+  },
+  coursesSectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 16,
+  },
+  courseCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  courseHeader: {
+    marginBottom: 8,
+  },
+  courseTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  courseInstructor: {
+    fontSize: 13,
+    color: '#7c3aed',
+    fontWeight: '600',
+  },
+  courseDescription: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  courseContent: {
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  enrollButton: {
+    backgroundColor: '#10b981',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  enrollButtonDisabled: {
+    backgroundColor: '#86efac',
+  },
+  enrollButtonText: {
     color: '#fff',
     fontSize: 15,
     fontWeight: 'bold',

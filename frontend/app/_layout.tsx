@@ -26,14 +26,13 @@ function RootLayoutNav() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
     const inStudentGroup = segments[0] === '(student)';
     const inInstructorGroup = segments[0] === '(instructor)';
 
     if (!token) {
-      // Not logged in, redirect to login
-      if (!inAuthGroup) {
-        router.replace('/(auth)/login');
+      // Not logged in - allow landing page and auth pages only
+      if (inStudentGroup || inInstructorGroup) {
+        router.replace('/');
       }
     } else {
       // Logged in, redirect based on role
