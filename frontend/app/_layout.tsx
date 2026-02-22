@@ -19,7 +19,7 @@ import { AuthProvider, AuthContext } from '@/context/AuthContext';
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { token, role, loading } = useContext(AuthContext);
+  const { token, user, loading } = useContext(AuthContext);
   const segments = useSegments();
   const router = useRouter();
 
@@ -37,13 +37,13 @@ function RootLayoutNav() {
       }
     } else {
       // Logged in, redirect based on role
-      if (role === 'student' && !inStudentGroup) {
+      if (user?.role === 'student' && !inStudentGroup) {
         router.replace('/(student)');
-      } else if (role === 'instructor' && !inInstructorGroup) {
+      } else if (user?.role === 'instructor' && !inInstructorGroup) {
         router.replace('/(instructor)');
       }
     }
-  }, [token, role, loading, segments, router]);
+  }, [token, user, loading, segments, router]);
 
   if (loading) {
     return (

@@ -11,7 +11,6 @@
 
 import { useState, useContext } from 'react';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   View, 
   Text, 
@@ -105,26 +104,29 @@ export default function Register() {
 
       // Handle both old and new backend response formats
       if (response.data.success || response.data.token) {
-        const { token, role: userRole } = response.data;
+        const { token, _id, name, email, role } = response.data;
         
-        if (!token || !userRole) {
+        if (!token || !role) {
           Alert.alert('Error', 'Invalid response from server');
           return;
         }
         
-        // Save token and role in AsyncStorage
-        await AsyncStorage.setItem('userToken', token);
-        await AsyncStorage.setItem('userRole', userRole);
+        const userData = {
+          _id,
+          name,
+          email,
+          role
+        };
         
-        // Update auth context
-        await login(token, userRole);
+        // Update auth context (this will handle AsyncStorage)
+        await login({ token, user: userData });
         
-        console.log('Navigating to dashboard for role:', userRole);
+        console.log('Navigating to dashboard for role:', role);
         
         // Navigate based on role
-        if (userRole === 'student') {
+        if (role === 'student') {
           router.replace('/(student)');
-        } else if (userRole === 'instructor') {
+        } else if (role === 'instructor') {
           router.replace('/(instructor)');
         } else {
           router.replace('/(tabs)');
