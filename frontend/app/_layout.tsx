@@ -30,9 +30,9 @@ function RootLayoutNav() {
     const inInstructorGroup = segments[0] === '(instructor)';
 
     if (!token) {
-      // Not logged in - allow landing page and auth pages only
+      // Not logged in - redirect to login if trying to access protected routes
       if (inStudentGroup || inInstructorGroup) {
-        router.replace('/');
+        router.replace('/(auth)/login');
       }
     } else {
       // Logged in, redirect based on role
@@ -47,7 +47,7 @@ function RootLayoutNav() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color="#0ea5e9" />
       </View>
     );
   }

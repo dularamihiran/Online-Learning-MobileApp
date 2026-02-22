@@ -20,15 +20,15 @@ export default function LandingPage() {
       {/* Features */}
       <View style={styles.featuresContainer}>
         <View style={styles.featureCard}>
-          <Ionicons name="sparkles" size={32} color="#4f46e5" />
+          <Ionicons name="sparkles" size={32} color="#0ea5e9" />
           <Text style={styles.featureText}>AI Course Suggestions</Text>
         </View>
         <View style={styles.featureCard}>
-          <Ionicons name="book" size={32} color="#4f46e5" />
+          <Ionicons name="book" size={32} color="#0ea5e9" />
           <Text style={styles.featureText}>Smart Learning</Text>
         </View>
         <View style={styles.featureCard}>
-          <Ionicons name="phone-portrait" size={32} color="#4f46e5" />
+          <Ionicons name="phone-portrait" size={32} color="#0ea5e9" />
           <Text style={styles.featureText}>Mobile Platform</Text>
         </View>
       </View>
@@ -102,11 +102,11 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   loginButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#0ea5e9',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#4f46e5',
+    shadowColor: '#0ea5e9',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -122,11 +122,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#4f46e5',
+    borderColor: '#0ea5e9',
     alignItems: 'center',
   },
   registerButtonText: {
-    color: '#4f46e5',
+    color: '#0ea5e9',
     fontSize: 18,
     fontWeight: 'bold',
   },

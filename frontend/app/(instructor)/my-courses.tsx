@@ -19,6 +19,12 @@ type Course = {
   title: string;
   description: string;
   content?: string;
+  category?: string;
+  level?: string;
+  duration?: string;
+  price?: string;
+  prerequisites?: string;
+  learningOutcomes?: string;
   createdAt?: string;
 };
 
@@ -28,7 +34,7 @@ type Student = {
   email: string;
 };
 
-export default function MyCourses() {
+export default function InstructorMyCourses() {
   const { token } = useContext(AuthContext);
   const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
@@ -41,7 +47,6 @@ export default function MyCourses() {
 
   const fetchCourses = useCallback(async () => {
     try {
-      console.log("Fetching instructor's courses...");
       const res = await axios.get(
         "https://online-learning-mobileapp.onrender.com/api/courses/my",
         {
@@ -50,23 +55,19 @@ export default function MyCourses() {
           },
         }
       );
-      console.log("Courses fetched:", res.data);
       setCourses(res.data);
     } catch (error: any) {
       console.log("Error fetching courses:", error);
-      console.log("Error response:", error.response?.data);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, [token]);
 
-  // Fetch courses when component mounts
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
 
-  // Refetch when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       fetchCourses();
@@ -81,7 +82,6 @@ export default function MyCourses() {
   const fetchEnrolledStudents = async (courseId: string) => {
     setLoadingStudents(true);
     try {
-      console.log('Fetching students for course:', courseId);
       const res = await axios.get(
         `https://online-learning-mobileapp.onrender.com/api/enrollments/course/${courseId}`,
         {
@@ -90,14 +90,10 @@ export default function MyCourses() {
           },
         }
       );
-      console.log('Students fetched:', res.data);
-      // Backend returns enrollments with student populated
       const studentsData = res.data.map((enrollment: any) => enrollment.student);
       setStudents(studentsData);
       setModalVisible(true);
     } catch (err: any) {
-      console.log('Fetch students error:', err);
-      console.log('Error response:', err.response?.data);
       Alert.alert('Error', err.response?.data?.message || 'Failed to fetch students');
     } finally {
       setLoadingStudents(false);
@@ -129,11 +125,8 @@ export default function MyCourses() {
                 }
               );
               Alert.alert('Success', 'Course deleted successfully');
-              // Remove from local state
               setCourses(prev => prev.filter(c => c._id !== courseId));
             } catch (err: any) {
-              console.log('Delete error:', err);
-              console.log('Error response:', err.response?.data);
               Alert.alert('Error', err.response?.data?.message || 'Failed to delete course');
             } finally {
               setDeleting(null);
@@ -147,7 +140,7 @@ export default function MyCourses() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+        <ActivityIndicator size="large" color="#0ea5e9" />
         <Text style={styles.loadingText}>Loading courses...</Text>
       </View>
     );
@@ -160,7 +153,7 @@ export default function MyCourses() {
         <Text style={styles.emptyTitle}>No Courses Yet</Text>
         <Text style={styles.emptyText}>
           You haven&apos;t created any courses yet.{"\n"}
-          Start by creating your first course!
+          Tap the Create tab to add your first course!
         </Text>
       </View>
     );
@@ -168,23 +161,48 @@ export default function MyCourses() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Courses</Text>
-        <Text style={styles.subtitle}>{courses.length} course{courses.length !== 1 ? 's' : ''}</Text>
-      </View>
-
       <FlatList
         data={courses}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7c3aed"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0ea5e9"]} />
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.courseTitle}>{item.title}</Text>
+              {item.level && (
+                <View style={[styles.badge, 
+                  item.level === 'Beginner' && styles.badgeBeginner,
+                  item.level === 'Intermediate' && styles.badgeIntermediate,
+                  item.level === 'Advanced' && styles.badgeAdvanced
+                ]}>
+                  <Text style={styles.badgeText}>{item.level}</Text>
+                </View>
+              )}
             </View>
+            
+            {(item.category || item.duration || item.price) && (
+              <View style={styles.metaContainer}>
+                {item.category && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>📚 {item.category}</Text>
+                  </View>
+                )}
+                {item.duration && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>⏱️ {item.duration}</Text>
+                  </View>
+                )}
+                {item.price && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaLabel}>💰 {item.price}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+            
             <Text style={styles.description}>{item.description}</Text>
             {item.content && (
               <View style={styles.contentContainer}>
@@ -195,7 +213,6 @@ export default function MyCourses() {
               </View>
             )}
             
-            {/* Action Buttons */}
             <View style={styles.buttonsContainer}>
               <TouchableOpacity
                 style={styles.viewStudentsButton}
@@ -229,7 +246,6 @@ export default function MyCourses() {
         )}
       />
 
-      {/* Modal for showing enrolled students */}
       <Modal visible={modalVisible} animationType="slide" transparent={false}>
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
@@ -288,23 +304,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#f8fafc",
   },
-  header: {
-    padding: 20,
-    paddingBottom: 10,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    marginTop: 4,
-  },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
@@ -342,11 +341,52 @@ const styles = StyleSheet.create({
   },
   cardHeader: {
     marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   courseTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#1e293b",
+    flex: 1,
+    marginRight: 8,
+  },
+  badge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  badgeBeginner: {
+    backgroundColor: "#d1fae5",
+  },
+  badgeIntermediate: {
+    backgroundColor: "#fed7aa",
+  },
+  badgeAdvanced: {
+    backgroundColor: "#fecaca",
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#1e293b",
+  },
+  metaContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
+  metaItem: {
+    backgroundColor: "#f1f5f9",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  metaLabel: {
+    fontSize: 12,
+    color: "#475569",
+    fontWeight: "500",
   },
   description: {
     fontSize: 15,
@@ -363,7 +403,7 @@ const styles = StyleSheet.create({
   contentLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#7c3aed",
+    color: "#0ea5e9",
     marginBottom: 4,
   },
   contentText: {
@@ -378,7 +418,7 @@ const styles = StyleSheet.create({
   },
   viewStudentsButton: {
     flex: 1,
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#0ea5e9",
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -419,7 +459,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
   },
-  // Modal styles
   modalContainer: {
     flex: 1,
     backgroundColor: "#f8fafc",
@@ -460,7 +499,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#0ea5e9",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,

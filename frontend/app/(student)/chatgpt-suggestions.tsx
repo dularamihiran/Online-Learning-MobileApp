@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import API from '@/api/api';
 
 type Message = {
@@ -24,6 +24,10 @@ type Course = {
   title: string;
   description: string;
   content?: string;
+  category?: string;
+  level?: string;
+  duration?: string;
+  price?: string;
   instructor: {
     _id: string;
     name: string;
@@ -41,10 +45,23 @@ export default function ChatGPTSuggestions() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
   const [enrolling, setEnrolling] = useState<string | null>(null);
 
-  // Debug log
-  console.log('Current recommended courses:', recommendedCourses.length);
+  // Fetch enrolled courses on mount
+  useEffect(() => {
+    fetchEnrolledCourses();
+  }, []);
+
+  const fetchEnrolledCourses = async () => {
+    try {
+      const res = await API.get('/enrollments/my');
+      const enrolledIds = res.data.map((enrollment: any) => enrollment.course._id);
+      setEnrolledCourseIds(enrolledIds);
+    } catch {
+      // Silently fail - not critical
+    }
+  };
 
   // Enroll in a course
   const handleEnroll = async (courseId: string) => {
@@ -52,8 +69,9 @@ export default function ChatGPTSuggestions() {
     try {
       await API.post('/enrollments/enroll', { courseId });
       Alert.alert('Success', 'You have successfully enrolled in this course!');
+      // Add to enrolled list
+      setEnrolledCourseIds(prev => [...prev, courseId]);
     } catch (err: any) {
-      console.log('Enroll error:', err);
       const errorMsg = err.response?.data?.message || 'Failed to enroll. Please try again.';
       Alert.alert('Error', errorMsg);
     } finally {
@@ -76,11 +94,7 @@ export default function ChatGPTSuggestions() {
     setLoading(true);
 
     try {
-      console.log('Sending prompt to GPT:', promptText);
       const res = await API.post('/gpt/ask', { prompt: promptText });
-      console.log('GPT response:', res.data);
-      console.log('Courses in response:', res.data.courses);
-      console.log('Number of courses:', res.data.courses?.length);
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -92,10 +106,8 @@ export default function ChatGPTSuggestions() {
       
       // Set recommended courses from backend response (filtered by prompt keywords)
       if (res.data.courses && res.data.courses.length > 0) {
-        console.log('Setting recommended courses:', res.data.courses);
         setRecommendedCourses(res.data.courses);
       } else {
-        console.log('No courses found in response');
         // No matching courses found
         setRecommendedCourses([]);
         const noCourseMessage: Message = {
@@ -106,9 +118,6 @@ export default function ChatGPTSuggestions() {
         setMessages(prev => [...prev, noCourseMessage]);
       }
     } catch (err: any) {
-      console.log('GPT error:', err);
-      console.log('GPT error response:', err.response?.data);
-      
       let errorText = 'Sorry, I encountered an error. ';
       if (err.response?.status === 500) {
         errorText += 'The AI service is currently unavailable. Please check if the OpenAI API key is configured in the backend.';
@@ -134,7 +143,7 @@ export default function ChatGPTSuggestions() {
       keyboardVerticalOffset={90}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>✨ AI Course Advisor</Text>
+        <Text style={styles.title}> AI Course Advisor</Text>
         <Text style={styles.subtitle}>Ask me anything about courses!</Text>
       </View>
 
@@ -167,43 +176,74 @@ export default function ChatGPTSuggestions() {
           </View>
         )}
 
-        {/* Debug Info */}
-        <View style={{ padding: 10, backgroundColor: '#f0f0f0', margin: 10 }}>
-          <Text>Debug: Courses Count = {recommendedCourses.length}</Text>
-        </View>
-
         {/* Recommended Courses Section */}
         {recommendedCourses.length > 0 && (
           <View style={styles.coursesSection}>
-            <Text style={styles.coursesSectionTitle}>📚 Relevant Courses for You</Text>
-            {recommendedCourses.map((course) => (
-              <View key={course._id} style={styles.courseCard}>
-                <View style={styles.courseHeader}>
-                  <Text style={styles.courseTitle}>{course.title}</Text>
-                  <Text style={styles.courseInstructor}>by {course.instructor.name}</Text>
+            <Text style={styles.coursesSectionTitle}> Relevant Courses for You</Text>
+            {recommendedCourses.map((course) => {
+              const isEnrolled = enrolledCourseIds.includes(course._id);
+              const isEnrolling = enrolling === course._id;
+
+              return (
+                <View key={course._id} style={styles.courseCard}>
+                  {course.level && (
+                    <View style={[styles.levelBadge, 
+                      course.level === 'Beginner' && styles.badgeBeginner,
+                      course.level === 'Intermediate' && styles.badgeIntermediate,
+                      course.level === 'Advanced' && styles.badgeAdvanced
+                    ]}>
+                      <Text style={styles.badgeText}>{course.level}</Text>
+                    </View>
+                  )}
+                  <View style={styles.courseHeader}>
+                    <Text style={styles.courseTitle}>{course.title}</Text>
+                    <Text style={styles.courseInstructor}>by {course.instructor.name}</Text>
+                  </View>
+                  
+                  {(course.category || course.duration || course.price) && (
+                    <View style={styles.metaContainer}>
+                      {course.category && (
+                        <View style={styles.metaItem}>
+                          <Text style={styles.metaText}>📚 {course.category}</Text>
+                        </View>
+                      )}
+                      {course.duration && (
+                        <View style={styles.metaItem}>
+                          <Text style={styles.metaText}>⏱️ {course.duration}</Text>
+                        </View>
+                      )}
+                      {course.price && (
+                        <View style={styles.metaItem}>
+                          <Text style={styles.metaText}>💰 {course.price}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                  
+                  <Text style={styles.courseDescription} numberOfLines={3}>
+                    {course.description}
+                  </Text>
+                  {course.content && (
+                    <Text style={styles.courseContent} numberOfLines={2}>
+                       {course.content}
+                    </Text>
+                  )}
+                  <TouchableOpacity
+                    style={[
+                      styles.enrollButton,
+                      isEnrolled && styles.enrolledButton,
+                      isEnrolling && styles.enrollButtonDisabled,
+                    ]}
+                    onPress={() => handleEnroll(course._id)}
+                    disabled={isEnrolled || isEnrolling}
+                  >
+                    <Text style={styles.enrollButtonText}>
+                      {isEnrolling ? 'Enrolling...' : isEnrolled ? '✓ Enrolled' : '✓ Enroll Now'}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.courseDescription} numberOfLines={3}>
-                  {course.description}
-                </Text>
-                {course.content && (
-                  <Text style={styles.courseContent} numberOfLines={2}>
-                    📖 {course.content}
-                  </Text>
-                )}
-                <TouchableOpacity
-                  style={[
-                    styles.enrollButton,
-                    enrolling === course._id && styles.enrollButtonDisabled,
-                  ]}
-                  onPress={() => handleEnroll(course._id)}
-                  disabled={enrolling === course._id}
-                >
-                  <Text style={styles.enrollButtonText}>
-                    {enrolling === course._id ? 'Enrolling...' : '✓ Enroll Now'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
       </ScrollView>
@@ -265,7 +305,7 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#0ea5e9',
   },
   aiBubble: {
     alignSelf: 'flex-start',
@@ -312,14 +352,14 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   sendButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#0ea5e9',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     justifyContent: 'center',
   },
   sendButtonDisabled: {
-    backgroundColor: '#a5b4fc',
+    backgroundColor: '#7dd3fc',
   },
   sendButtonText: {
     color: '#fff',
@@ -349,9 +389,34 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    position: 'relative',
+  },
+  levelBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 1,
+  },
+  badgeBeginner: {
+    backgroundColor: '#d1fae5',
+  },
+  badgeIntermediate: {
+    backgroundColor: '#fed7aa',
+  },
+  badgeAdvanced: {
+    backgroundColor: '#fecaca',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1e293b',
   },
   courseHeader: {
     marginBottom: 8,
+    paddingRight: 90,
   },
   courseTitle: {
     fontSize: 18,
@@ -361,8 +426,30 @@ const styles = StyleSheet.create({
   },
   courseInstructor: {
     fontSize: 13,
-    color: '#7c3aed',
+    color: '#0ea5e9',
     fontWeight: '600',
+  },
+  metaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#475569',
+    fontWeight: '500',
   },
   courseDescription: {
     fontSize: 14,
@@ -383,6 +470,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
+  },
+  enrolledButton: {
+    backgroundColor: '#64748b',
   },
   enrollButtonDisabled: {
     backgroundColor: '#86efac',

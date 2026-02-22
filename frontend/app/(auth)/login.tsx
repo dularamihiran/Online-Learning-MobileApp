@@ -240,13 +240,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   button: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0ea5e9',
     padding: 16,
     borderRadius: 8,
     marginTop: 10,
   },
   buttonDisabled: {
-    backgroundColor: '#93c5fd',
+    backgroundColor: '#7dd3fc',
   },
   buttonText: {
     color: 'white',
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   linkBold: {
-    color: '#2563eb',
+    color: '#0ea5e9',
     fontWeight: '600',
   },
 });

@@ -1,149 +1,111 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
-import { useEffect, useState } from 'react';
-import API from '@/api/api';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { useContext } from 'react';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from '@/context/AuthContext';
 
-type Course = {
-  _id: string;
-  title: string;
-  description: string;
-  content?: string;
-  instructor: {
-    _id: string;
-    name: string;
-  };
-};
+export default function StudentDashboard() {
+  const { user } = useContext(AuthContext);
+  const router = useRouter();
 
-export default function AllCourses() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
-  const [enrolling, setEnrolling] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    fetchCourses();
-    fetchEnrolledCourses();
-  }, []);
-
-  const fetchCourses = async () => {
-    try {
-      const res = await API.get('/courses');
-      console.log('Courses fetched:', res.data);
-      setCourses(res.data);
-    } catch (err) {
-      console.log('Fetch error:', err);
-      Alert.alert('Error', 'Failed to fetch courses');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const fetchEnrolledCourses = async () => {
-    try {
-      const res = await API.get('/enrollments/my');
-      const enrolledIds = res.data.map((enrollment: any) => enrollment.course._id);
-      setEnrolledCourseIds(enrolledIds);
-    } catch (err) {
-      console.log('Fetch enrolled courses error:', err);
-    }
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchCourses();
-    fetchEnrolledCourses();
-  };
-
-  const handleEnroll = async (courseId: string) => {
-    setEnrolling(courseId);
-    try {
-      await API.post('/enrollments/enroll', { courseId });
-      Alert.alert('Success', 'Enrolled successfully!');
-      // Add to enrolled list
-      setEnrolledCourseIds(prev => [...prev, courseId]);
-    } catch (err: any) {
-      console.log('Enroll error:', err);
-      console.log('Error response:', err.response?.data);
-      const errorMsg = err.response?.data?.message || 'Enrollment failed';
-      Alert.alert('Error', errorMsg);
-    } finally {
-      setEnrolling(null);
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-        <Text style={styles.loadingText}>Loading courses...</Text>
-      </View>
-    );
-  }
-
-  // Filter out enrolled courses
-  const availableCourses = courses.filter(course => !enrolledCourseIds.includes(course._id));
-
-  if (availableCourses.length === 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.emptyEmoji}>📚</Text>
-        <Text style={styles.emptyTitle}>No Available Courses</Text>
-        <Text style={styles.emptyText}>
-          {courses.length > 0 
-            ? "You're enrolled in all available courses!" 
-            : "Check back later for new courses!"}
-        </Text>
-      </View>
-    );
-  }
+  const quickActions = [
+    {
+      icon: 'book-outline',
+      title: 'Browse Courses',
+      subtitle: 'Explore available courses',
+      color: '#0ea5e9',
+      route: '/(student)/all-courses' as any,
+    },
+    {
+      icon: 'bookmarks-outline',
+      title: 'My Courses',
+      subtitle: 'View enrolled courses',
+      color: '#10b981',
+      route: '/(student)/my-courses' as any,
+    },
+    {
+      icon: 'sparkles-outline',
+      title: 'AI Advisor',
+      subtitle: 'Get course recommendations',
+      color: '#f59e0b',
+      route: '/(student)/chatgpt-suggestions' as any,
+    },
+    {
+      icon: 'person-outline',
+      title: 'My Profile',
+      subtitle: 'View profile & settings',
+      color: '#8b5cf6',
+      route: '/(student)/profile' as any,
+    },
+  ];
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={availableCourses}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7c3aed"]} />
-        }
-        renderItem={({ item }) => {
-          const isEnrolling = enrolling === item._id;
+    <ScrollView style={styles.container}>
+      {/* Welcome Section */}
+      <View style={styles.welcomeSection}>
+        <View style={styles.welcomeCard}>
+          <View style={styles.avatarContainer}>
+            <Ionicons name="person" size={32} color="#0ea5e9" />
+          </View>
+          <View style={styles.welcomeTextContainer}>
+            <Text style={styles.welcomeSubtitle}>Welcome back,</Text>
+            <Text style={styles.welcomeTitle}>{user?.name || 'Student'}!</Text>
+          </View>
+        </View>
+      </View>
 
-          return (
-            <View style={styles.card}>
-              <View style={styles.courseHeader}>
-                <Text style={styles.courseTitle}>{item.title}</Text>
-                <Text style={styles.courseInstructor}>by {item.instructor.name}</Text>
+      {/* Quick Actions */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={styles.grid}>
+          {quickActions.map((action, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[styles.actionCard, { borderLeftColor: action.color }]}
+              onPress={() => router.push(action.route)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.iconContainer, { backgroundColor: `${action.color}15` }]}>
+                <Ionicons name={action.icon as any} size={28} color={action.color} />
               </View>
-              <Text style={styles.description} numberOfLines={3}>
-                {item.description}
-              </Text>
-              {item.content && (
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentLabel}>📖 Content:</Text>
-                  <Text style={styles.contentText} numberOfLines={2}>
-                    {item.content}
-                  </Text>
-                </View>
-              )}
-              <TouchableOpacity
-                style={[
-                  styles.enrollButton,
-                  isEnrolling && styles.enrollingButton,
-                ]}
-                onPress={() => handleEnroll(item._id)}
-                disabled={isEnrolling}
-              >
-                <Text style={styles.enrollButtonText}>
-                  {isEnrolling ? '⏳ Enrolling...' : '✓ Enroll Now'}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.actionTextContainer}>
+                <Text style={styles.actionTitle}>{action.title}</Text>
+                <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Stats Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Learning Stats</Text>
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
+              <Ionicons name="book" size={24} color="#0ea5e9" />
             </View>
-          );
-        }}
-      />
-    </View>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Enrolled</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
+              <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+            </View>
+            <Text style={styles.statValue}>0</Text>
+            <Text style={styles.statLabel}>Completed</Text>
+          </View>
+          <View style={styles.statCard}>
+            <View style={[styles.statIcon, { backgroundColor: '#fef3c7' }]}>
+              <Ionicons name="time" size={24} color="#f59e0b" />
+            </View>
+            <Text style={styles.statValue}>0h</Text>
+            <Text style={styles.statLabel}>Study Time</Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -152,103 +114,123 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8fafc',
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  welcomeSection: {
     padding: 20,
-    backgroundColor: '#f8fafc',
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748b',
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#64748b',
-    textAlign: 'center',
-  },
-  listContent: {
-    padding: 16,
-  },
-  card: {
+  welcomeCard: {
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
     elevation: 3,
   },
-  courseHeader: {
-    marginBottom: 8,
+  avatarContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#dbeafe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
-  courseTitle: {
+  welcomeTextContainer: {
+    flex: 1,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#0f172a',
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1e293b',
+    color: '#0f172a',
+    marginBottom: 16,
+  },
+  grid: {
+    gap: 12,
+  },
+  actionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderLeftWidth: 4,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  actionTextContainer: {
+    flex: 1,
+  },
+  actionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
     marginBottom: 4,
   },
-  courseInstructor: {
-    fontSize: 13,
-    color: '#7c3aed',
-    fontWeight: '600',
-  },
-  description: {
-    fontSize: 14,
-    color: '#475569',
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  contentContainer: {
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  contentLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#7c3aed',
-    marginBottom: 4,
-  },
-  contentText: {
+  actionSubtitle: {
     fontSize: 13,
     color: '#64748b',
-    fontStyle: 'italic',
-    marginBottom: 12,
-    lineHeight: 18,
   },
-  enrollButton: {
-    backgroundColor: '#10b981',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  statsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
     alignItems: 'center',
-    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  enrolledButton: {
-    backgroundColor: '#6366f1',
+  statIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  enrollingButton: {
-    backgroundColor: '#86efac',
-  },
-  enrollButtonText: {
-    color: '#fff',
-    fontSize: 15,
+  statValue: {
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    textAlign: 'center',
   },
 });

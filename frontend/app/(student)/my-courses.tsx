@@ -8,6 +8,10 @@ type Course = {
   title: string;
   description: string;
   content?: string;
+  category?: string;
+  level?: string;
+  duration?: string;
+  price?: string;
   instructor: {
     _id: string;
     name: string;
@@ -54,7 +58,7 @@ export default function MyCourses() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+        <ActivityIndicator size="large" color="#0ea5e9" />
         <Text style={styles.loadingText}>Loading your courses...</Text>
       </View>
     );
@@ -63,7 +67,7 @@ export default function MyCourses() {
   if (courses.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyEmoji}>📚</Text>
+        <Text style={styles.emptyEmoji}></Text>
         <Text style={styles.emptyTitle}>No Enrolled Courses</Text>
         <Text style={styles.emptyText}>
           You haven&apos;t enrolled in any courses yet.{"\n"}
@@ -85,23 +89,53 @@ export default function MyCourses() {
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7c3aed"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0ea5e9"]} />
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.enrolledBadge}>
               <Text style={styles.enrolledBadgeText}>✓ Enrolled</Text>
             </View>
+            {item.level && (
+              <View style={[styles.levelBadge, 
+                item.level === 'Beginner' && styles.badgeBeginner,
+                item.level === 'Intermediate' && styles.badgeIntermediate,
+                item.level === 'Advanced' && styles.badgeAdvanced
+              ]}>
+                <Text style={styles.badgeText}>{item.level}</Text>
+              </View>
+            )}
             <View style={styles.courseHeader}>
               <Text style={styles.courseTitle}>{item.title}</Text>
               <Text style={styles.courseInstructor}>by {item.instructor.name}</Text>
             </View>
+            
+            {(item.category || item.duration || item.price) && (
+              <View style={styles.metaContainer}>
+                {item.category && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaText}>📚 {item.category}</Text>
+                  </View>
+                )}
+                {item.duration && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaText}>⏱️ {item.duration}</Text>
+                  </View>
+                )}
+                {item.price && (
+                  <View style={styles.metaItem}>
+                    <Text style={styles.metaText}>💰 {item.price}</Text>
+                  </View>
+                )}
+              </View>
+            )}
+            
             <Text style={styles.description} numberOfLines={3}>
               {item.description}
             </Text>
             {item.content && (
               <View style={styles.contentContainer}>
-                <Text style={styles.contentLabel}>📖 Content:</Text>
+                <Text style={styles.contentLabel}>📋 Content:</Text>
                 <Text style={styles.contentText} numberOfLines={2}>
                   {item.content}
                 </Text>
@@ -183,7 +217,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: '#6366f1',
+    backgroundColor: '#0ea5e9',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -193,6 +227,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 11,
     fontWeight: 'bold',
+  },
+  levelBadge: {
+    position: 'absolute',
+    top: 50,
+    right: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 1,
+  },
+  badgeBeginner: {
+    backgroundColor: '#d1fae5',
+  },
+  badgeIntermediate: {
+    backgroundColor: '#fed7aa',
+  },
+  badgeAdvanced: {
+    backgroundColor: '#fecaca',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1e293b',
   },
   courseHeader: {
     marginBottom: 8,
@@ -206,8 +263,30 @@ const styles = StyleSheet.create({
   },
   courseInstructor: {
     fontSize: 13,
-    color: '#7c3aed',
+    color: '#0ea5e9',
     fontWeight: '600',
+  },
+  metaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#475569',
+    fontWeight: '500',
   },
   description: {
     fontSize: 14,
@@ -224,7 +303,7 @@ const styles = StyleSheet.create({
   contentLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#7c3aed',
+    color: '#0ea5e9',
     marginBottom: 4,
   },
   contentText: {

@@ -2,12 +2,28 @@ const Course = require("../models/Course");
 
 exports.createCourse = async (req, res) => {
   try {
-    const { title, description, content } = req.body;
+    const { 
+      title, 
+      description, 
+      content, 
+      category, 
+      level, 
+      duration, 
+      price, 
+      prerequisites, 
+      learningOutcomes 
+    } = req.body;
 
     const course = await Course.create({
       title,
       description,
       content,
+      category,
+      level,
+      duration,
+      price,
+      prerequisites,
+      learningOutcomes,
       instructor: req.user._id
     });
 
