@@ -5,19 +5,32 @@ export default function StudentLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#64748b',
+        tabBarActiveTintColor: '#0ea5e9',
+        tabBarInactiveTintColor: '#94a3b8',
         headerStyle: {
-          backgroundColor: '#2563eb',
+          backgroundColor: '#fff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 3,
         },
-        headerTintColor: '#fff',
+        headerTintColor: '#0f172a',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 18,
         },
         tabBarStyle: {
+          backgroundColor: '#fff',
           paddingTop: 8,
           paddingBottom: 8,
           height: 65,
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 5,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -28,9 +41,17 @@ export default function StudentLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: 'Home',
+          headerTitle: 'Home',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="all-courses"
+        options={{
           title: 'All Courses',
           headerTitle: 'Available Courses',
-          tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} />,
+          href: null, // Hidden from tabs, accessible via Home
         }}
       />
       <Tabs.Screen

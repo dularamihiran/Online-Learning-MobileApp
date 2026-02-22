@@ -1,9 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useContext } from 'react';
+import { useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 
 export default function StudentProfile() {
   const { user, logout } = useContext(AuthContext);
+  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert(
@@ -14,7 +16,10 @@ export default function StudentProfile() {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => logout(),
+          onPress: async () => {
+            await logout();
+            router.replace('/(auth)/login');
+          },
         },
       ]
     );
@@ -33,7 +38,7 @@ export default function StudentProfile() {
         <Text style={styles.email}>{user?.email || 'student@example.com'}</Text>
         
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>🎓 Student</Text>
+          <Text style={styles.badgeText}> Student</Text>
         </View>
 
         <View style={styles.infoCard}>
@@ -51,7 +56,7 @@ export default function StudentProfile() {
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>🚪 Logout</Text>
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -73,11 +78,11 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0ea5e9',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    shadowColor: '#2563eb',
+    shadowColor: '#0ea5e9',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -100,14 +105,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   badge: {
-    backgroundColor: '#dbeafe',
+    backgroundColor: '#e0f2fe',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginBottom: 32,
   },
   badgeText: {
-    color: '#2563eb',
+    color: '#0ea5e9',
     fontSize: 14,
     fontWeight: '600',
   },

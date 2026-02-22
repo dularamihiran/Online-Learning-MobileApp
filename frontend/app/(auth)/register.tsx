@@ -316,8 +316,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleButtonActive: {
-    borderColor: '#2563eb',
-    backgroundColor: '#eff6ff',
+    borderColor: '#0ea5e9',
+    backgroundColor: '#e0f2fe',
   },
   roleButtonText: {
     fontSize: 15,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   roleButtonTextActive: {
-    color: '#2563eb',
+    color: '#0ea5e9',
   },
   inputContainer: {
     marginBottom: 20,
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   linkBold: {
-    color: '#2563eb',
+    color: '#0ea5e9',
     fontWeight: '600',
   },
 });

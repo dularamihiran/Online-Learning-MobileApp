@@ -80,7 +80,7 @@ export default function EditCourse() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+        <ActivityIndicator size="large" color="#0ea5e9" />
         <Text style={styles.loadingText}>Loading course...</Text>
       </View>
     );
@@ -230,19 +230,19 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   updateButton: {
-    backgroundColor: '#7c3aed',
+    backgroundColor: '#0ea5e9',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: '#7c3aed',
+    shadowColor: '#0ea5e9',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
   updateButtonDisabled: {
-    backgroundColor: '#a78bfa',
+    backgroundColor: '#7dd3fc',
   },
   updateButtonText: {
     color: '#fff',
