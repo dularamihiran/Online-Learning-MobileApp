@@ -1,4 +1,5 @@
 const Course = require("../models/Course");
+const Enrollment = require("../models/Enrollment");
 
 exports.createCourse = async (req, res) => {
   try {
@@ -88,6 +89,27 @@ exports.deleteCourse = async (req, res) => {
 
     await course.deleteOne();
     res.json({ message: "Course deleted successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getInstructorStats = async (req, res) => {
+  try {
+    // Get total courses created by instructor
+    const totalCourses = await Course.countDocuments({ instructor: req.user._id });
+
+    // Get total students enrolled in instructor's courses
+    const instructorCourses = await Course.find({ instructor: req.user._id }).select('_id');
+    const courseIds = instructorCourses.map(course => course._id);
+    
+    const totalStudents = await Enrollment.distinct('student', { course: { $in: courseIds } });
+
+    res.json({
+      totalCourses,
+      totalStudents: totalStudents.length
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

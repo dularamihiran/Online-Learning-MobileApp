@@ -77,34 +77,6 @@ export default function StudentDashboard() {
           ))}
         </View>
       </View>
-
-      {/* Stats Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Learning Stats</Text>
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="book" size={24} color="#0ea5e9" />
-            </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Enrolled</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
-              <Ionicons name="checkmark-circle" size={24} color="#10b981" />
-            </View>
-            <Text style={styles.statValue}>0</Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-          <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#fef3c7' }]}>
-              <Ionicons name="time" size={24} color="#f59e0b" />
-            </View>
-            <Text style={styles.statValue}>0h</Text>
-            <Text style={styles.statLabel}>Study Time</Text>
-          </View>
-        </View>
-      </View>
     </ScrollView>
   );
 }
@@ -197,40 +169,5 @@ const styles = StyleSheet.create({
   actionSubtitle: {
     fontSize: 13,
     color: '#64748b',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    textAlign: 'center',
   },
 });
