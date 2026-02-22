@@ -261,6 +261,12 @@ export default function Register() {
           <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
             <Text style={styles.link}>Already have an account? <Text style={styles.linkBold}>Login</Text></Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/')}>
+            <Text style={styles.link}>
+              <Text style={styles.linkBold}>← Back to Home</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

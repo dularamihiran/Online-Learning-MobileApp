@@ -177,6 +177,12 @@ export default function Login() {
               Don&apos;t have an account? <Text style={styles.linkBold}>Register</Text>
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/')}>
+            <Text style={styles.link}>
+              <Text style={styles.linkBold}>← Back to Home</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
