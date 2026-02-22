@@ -84,7 +84,7 @@ export default function CourseList() {
   if (courses.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyEmoji}>📚</Text>
+
         <Text style={styles.emptyTitle}>No Courses Available</Text>
         <Text style={styles.emptyText}>Check back later for new courses!</Text>
       </View>
@@ -120,7 +120,7 @@ export default function CourseList() {
               </Text>
               {item.content && (
                 <View style={styles.contentContainer}>
-                  <Text style={styles.contentLabel}>📖 Content:</Text>
+                  <Text style={styles.contentLabel}>Content:</Text>
                   <Text style={styles.contentText} numberOfLines={2}>
                     {item.content}
                   </Text>
@@ -136,7 +136,7 @@ export default function CourseList() {
                 disabled={isEnrolled || isEnrolling}
               >
                 <Text style={styles.enrollButtonText}>
-                  {isEnrolling ? '⏳ Enrolling...' : isEnrolled ? '✓ Enrolled' : '✓ Enroll Now'}
+                  {isEnrolling ? 'Enrolling...' : isEnrolled ? 'Enrolled' : 'Enroll Now'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -180,10 +180,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#64748b',
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 24,

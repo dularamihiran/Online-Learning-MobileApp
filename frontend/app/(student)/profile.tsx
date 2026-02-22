@@ -38,7 +38,7 @@ export default function StudentProfile() {
         <Text style={styles.email}>{user?.email || 'student@example.com'}</Text>
         
         <View style={styles.badge}>
-          <Text style={styles.badgeText}> Student</Text>
+          <Text style={styles.badgeText}>Student</Text>
         </View>
 
         <View style={styles.infoCard}>
@@ -49,7 +49,12 @@ export default function StudentProfile() {
           <View style={styles.divider} />
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Member Since</Text>
-            <Text style={styles.infoValue}>2024</Text>
+            <Text style={styles.infoValue}>
+              {user?.createdAt 
+                ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : 'Account active'
+              }
+            </Text>
           </View>
         </View>
       </View>

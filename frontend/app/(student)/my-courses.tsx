@@ -67,7 +67,6 @@ export default function MyCourses() {
   if (courses.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyEmoji}></Text>
         <Text style={styles.emptyTitle}>No Enrolled Courses</Text>
         <Text style={styles.emptyText}>
           You haven&apos;t enrolled in any courses yet.{"\n"}
@@ -94,7 +93,7 @@ export default function MyCourses() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.enrolledBadge}>
-              <Text style={styles.enrolledBadgeText}>✓ Enrolled</Text>
+              <Text style={styles.enrolledBadgeText}>Enrolled</Text>
             </View>
             {item.level && (
               <View style={[styles.levelBadge, 
@@ -114,17 +113,17 @@ export default function MyCourses() {
               <View style={styles.metaContainer}>
                 {item.category && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaText}>📚 {item.category}</Text>
+                    <Text style={styles.metaText}>{item.category}</Text>
                   </View>
                 )}
                 {item.duration && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaText}>⏱️ {item.duration}</Text>
+                    <Text style={styles.metaText}>{item.duration}</Text>
                   </View>
                 )}
                 {item.price && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaText}>💰 {item.price}</Text>
+                    <Text style={styles.metaText}>{item.price}</Text>
                   </View>
                 )}
               </View>
@@ -135,7 +134,7 @@ export default function MyCourses() {
             </Text>
             {item.content && (
               <View style={styles.contentContainer}>
-                <Text style={styles.contentLabel}>📋 Content:</Text>
+                <Text style={styles.contentLabel}>Content:</Text>
                 <Text style={styles.contentText} numberOfLines={2}>
                   {item.content}
                 </Text>
@@ -181,10 +180,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: '#64748b',
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 24,

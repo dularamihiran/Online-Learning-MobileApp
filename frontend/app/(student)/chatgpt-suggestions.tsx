@@ -143,7 +143,7 @@ export default function ChatGPTSuggestions() {
       keyboardVerticalOffset={90}
     >
       <View style={styles.header}>
-        <Text style={styles.title}> AI Course Advisor</Text>
+        <Text style={styles.title}>AI Course Advisor</Text>
         <Text style={styles.subtitle}>Ask me anything about courses!</Text>
       </View>
 
@@ -179,7 +179,7 @@ export default function ChatGPTSuggestions() {
         {/* Recommended Courses Section */}
         {recommendedCourses.length > 0 && (
           <View style={styles.coursesSection}>
-            <Text style={styles.coursesSectionTitle}> Relevant Courses for You</Text>
+            <Text style={styles.coursesSectionTitle}>Relevant Courses for You</Text>
             {recommendedCourses.map((course) => {
               const isEnrolled = enrolledCourseIds.includes(course._id);
               const isEnrolling = enrolling === course._id;
@@ -204,17 +204,17 @@ export default function ChatGPTSuggestions() {
                     <View style={styles.metaContainer}>
                       {course.category && (
                         <View style={styles.metaItem}>
-                          <Text style={styles.metaText}>📚 {course.category}</Text>
+                          <Text style={styles.metaText}>{course.category}</Text>
                         </View>
                       )}
                       {course.duration && (
                         <View style={styles.metaItem}>
-                          <Text style={styles.metaText}>⏱️ {course.duration}</Text>
+                          <Text style={styles.metaText}>{course.duration}</Text>
                         </View>
                       )}
                       {course.price && (
                         <View style={styles.metaItem}>
-                          <Text style={styles.metaText}>💰 {course.price}</Text>
+                          <Text style={styles.metaText}>{course.price}</Text>
                         </View>
                       )}
                     </View>
@@ -238,7 +238,7 @@ export default function ChatGPTSuggestions() {
                     disabled={isEnrolled || isEnrolling}
                   >
                     <Text style={styles.enrollButtonText}>
-                      {isEnrolling ? 'Enrolling...' : isEnrolled ? '✓ Enrolled' : '✓ Enroll Now'}
+                      {isEnrolling ? 'Enrolling...' : isEnrolled ? 'Enrolled' : 'Enroll Now'}
                     </Text>
                   </TouchableOpacity>
                 </View>

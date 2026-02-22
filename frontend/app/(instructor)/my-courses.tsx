@@ -149,7 +149,7 @@ export default function InstructorMyCourses() {
   if (courses.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyEmoji}>📚</Text>
+
         <Text style={styles.emptyTitle}>No Courses Yet</Text>
         <Text style={styles.emptyText}>
           You haven&apos;t created any courses yet.{"\n"}
@@ -187,17 +187,17 @@ export default function InstructorMyCourses() {
               <View style={styles.metaContainer}>
                 {item.category && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaLabel}>📚 {item.category}</Text>
+                    <Text style={styles.metaLabel}>{item.category}</Text>
                   </View>
                 )}
                 {item.duration && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaLabel}>⏱️ {item.duration}</Text>
+                    <Text style={styles.metaLabel}>{item.duration}</Text>
                   </View>
                 )}
                 {item.price && (
                   <View style={styles.metaItem}>
-                    <Text style={styles.metaLabel}>💰 {item.price}</Text>
+                    <Text style={styles.metaLabel}>{item.price}</Text>
                   </View>
                 )}
               </View>
@@ -220,7 +220,7 @@ export default function InstructorMyCourses() {
                 disabled={loadingStudents}
               >
                 <Text style={styles.viewStudentsButtonText}>
-                  {loadingStudents ? '...' : '👥'}
+                  {loadingStudents ? '...' : 'View'}
                 </Text>
               </TouchableOpacity>
 
@@ -229,7 +229,7 @@ export default function InstructorMyCourses() {
                 onPress={() => handleEdit(item._id)}
                 disabled={deleting === item._id}
               >
-                <Text style={styles.editButtonText}>✏️ Edit</Text>
+                <Text style={styles.editButtonText}>Edit</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -238,7 +238,7 @@ export default function InstructorMyCourses() {
                 disabled={deleting === item._id}
               >
                 <Text style={styles.deleteButtonText}>
-                  {deleting === item._id ? '...' : '🗑️'}
+                  {deleting === item._id ? '...' : 'Delete'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -308,10 +308,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "#64748b",
-  },
-  emptyEmoji: {
-    fontSize: 64,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 24,

@@ -15,6 +15,7 @@ type UserType = {
   name: string;
   email: string;
   role: "student" | "instructor";
+  createdAt?: string;
 };
 
 type AuthContextType = {

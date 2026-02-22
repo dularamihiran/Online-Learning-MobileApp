@@ -41,7 +41,7 @@ export default function InstructorProfile() {
 
         {/* Role Badge */}
         <View style={styles.roleBadge}>
-          <Text style={styles.roleBadgeText}>👨‍🏫 Instructor</Text>
+          <Text style={styles.roleBadgeText}>Instructor</Text>
         </View>
 
         {/* Info Card */}
@@ -54,14 +54,17 @@ export default function InstructorProfile() {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Member Since</Text>
             <Text style={styles.infoValue}>
-              {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+              {user?.createdAt 
+                ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+                : 'Account active'
+              }
             </Text>
           </View>
         </View>
 
         {/* Logout Button */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>🚪 Logout</Text>
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </View>
