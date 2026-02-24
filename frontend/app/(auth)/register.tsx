@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Register() {
   const router = useRouter();
@@ -156,6 +157,10 @@ export default function Register() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.formContainer}>
+          <View style={styles.logoContainer}>
+            <Ionicons name="school" size={48} color="#3498db" />
+          </View>
+          <Text style={styles.appName}>Learnova</Text>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Sign up to get started</Text>
 
@@ -285,8 +290,26 @@ const styles = StyleSheet.create({
   formContainer: {
     padding: 24,
   },
-  title: {
+  logoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#e3f2fd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  appName: {
     fontSize: 32,
+    fontWeight: 'bold',
+    color: '#3498db',
+    textAlign: 'center',
+    marginBottom: 24,
+    letterSpacing: 1,
+  },
+  title: {
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 8,
     textAlign: 'center',

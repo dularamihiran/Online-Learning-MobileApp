@@ -1,20 +1,20 @@
 {
   "expo": {
-    "name": "Online Learning",
-    "slug": "online-learning",
+    "name": "Learnova",
+    "slug": "learnova",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "online-learning",
+    "scheme": "learnova",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.onlinelearning.app"
+      "bundleIdentifier": "com.learnova.app"
     },
     "android": {
-      "package": "com.onlinelearning.app",
+      "package": "com.learnova.app",
       "adaptiveIcon": {
-        "backgroundColor": "#2563eb"
+        "backgroundColor": "#3498db"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

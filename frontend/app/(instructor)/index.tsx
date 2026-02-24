@@ -31,28 +31,28 @@ export default function InstructorDashboard() {
       icon: 'library-outline',
       title: 'My Courses',
       subtitle: 'View & manage your courses',
-      color: '#0ea5e9',
+      color: '#3498db',
       route: '/(instructor)/my-courses' as any,
     },
     {
       icon: 'add-circle-outline',
       title: 'Create Course',
       subtitle: 'Add a new course',
-      color: '#10b981',
+      color: '#3498db',
       route: '/(instructor)/create-course' as any,
     },
     {
       icon: 'people-outline',
       title: 'Students',
       subtitle: 'View enrolled students',
-      color: '#f59e0b',
+      color: '#3498db',
       route: '/(instructor)/my-courses' as any,
     },
     {
       icon: 'person-outline',
       title: 'My Profile',
       subtitle: 'View profile & settings',
-      color: '#8b5cf6',
+      color: '#3498db',
       route: '/(instructor)/profile' as any,
     },
   ];
@@ -63,7 +63,7 @@ export default function InstructorDashboard() {
       <View style={styles.welcomeSection}>
         <View style={styles.welcomeCard}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={32} color="#0ea5e9" />
+            <Ionicons name="person" size={32} color="#3498db" />
           </View>
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeSubtitle}>Welcome back,</Text>
@@ -101,20 +101,20 @@ export default function InstructorDashboard() {
         <Text style={styles.sectionTitle}>Teaching Stats</Text>
         {loading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0ea5e9" />
+            <ActivityIndicator size="large" color="#3498db" />
           </View>
         ) : (
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
-                <Ionicons name="library" size={24} color="#0ea5e9" />
+              <View style={[styles.statIcon, { backgroundColor: '#e3f2fd' }]}>
+                <Ionicons name="library" size={24} color="#3498db" />
               </View>
               <Text style={styles.statValue}>{stats.totalCourses}</Text>
               <Text style={styles.statLabel}>Courses</Text>
             </View>
             <View style={styles.statCard}>
-              <View style={[styles.statIcon, { backgroundColor: '#d1fae5' }]}>
-                <Ionicons name="people" size={24} color="#10b981" />
+              <View style={[styles.statIcon, { backgroundColor: '#e3f2fd' }]}>
+                <Ionicons name="people" size={24} color="#3498db" />
               </View>
               <Text style={styles.statValue}>{stats.totalStudents}</Text>
               <Text style={styles.statLabel}>Students</Text>
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#e0f2fe',
+    backgroundColor: '#e3f2fd',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,

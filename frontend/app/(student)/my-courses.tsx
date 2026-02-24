@@ -1,6 +1,7 @@
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { useEffect, useState, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import API from '@/api/api';
 
 type Course = {
@@ -19,6 +20,7 @@ type Course = {
 };
 
 export default function MyCourses() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,8 +93,16 @@ export default function MyCourses() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0ea5e9"]} />
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push({
+              pathname: '/course-details',
+              params: { course: JSON.stringify(item), isEnrolled: 'true' }
+            } as any)}
+            activeOpacity={0.7}
+          >
             <View style={styles.enrolledBadge}>
+              <Ionicons name="checkmark-circle" size={14} color="#fff" />
               <Text style={styles.enrolledBadgeText}>Enrolled</Text>
             </View>
             {item.level && (
@@ -106,23 +116,29 @@ export default function MyCourses() {
             )}
             <View style={styles.courseHeader}>
               <Text style={styles.courseTitle}>{item.title}</Text>
-              <Text style={styles.courseInstructor}>by {item.instructor.name}</Text>
+              <View style={styles.instructorRow}>
+                <Ionicons name="person" size={14} color="#0ea5e9" />
+                <Text style={styles.courseInstructor}>{item.instructor.name}</Text>
+              </View>
             </View>
             
             {(item.category || item.duration || item.price) && (
               <View style={styles.metaContainer}>
                 {item.category && (
                   <View style={styles.metaItem}>
+                    <Ionicons name="folder-outline" size={12} color="#0ea5e9" />
                     <Text style={styles.metaText}>{item.category}</Text>
                   </View>
                 )}
                 {item.duration && (
                   <View style={styles.metaItem}>
+                    <Ionicons name="time-outline" size={12} color="#0ea5e9" />
                     <Text style={styles.metaText}>{item.duration}</Text>
                   </View>
                 )}
                 {item.price && (
                   <View style={styles.metaItem}>
+                    <Ionicons name="pricetag-outline" size={12} color="#0ea5e9" />
                     <Text style={styles.metaText}>{item.price}</Text>
                   </View>
                 )}
@@ -134,13 +150,21 @@ export default function MyCourses() {
             </Text>
             {item.content && (
               <View style={styles.contentContainer}>
-                <Text style={styles.contentLabel}>Content:</Text>
+                <View style={styles.contentLabel}>
+                  <Ionicons name="document-text-outline" size={14} color="#0ea5e9" />
+                  <Text style={styles.contentLabelText}>Content Preview</Text>
+                </View>
                 <Text style={styles.contentText} numberOfLines={2}>
                   {item.content}
                 </Text>
               </View>
             )}
-          </View>
+            
+            <View style={styles.viewDetailsHint}>
+              <Text style={styles.viewDetailsText}>Tap to view full details</Text>
+              <Ionicons name="chevron-forward" size={16} color="#0ea5e9" />
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -217,6 +241,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   enrolledBadgeText: {
     color: '#fff',
@@ -256,6 +283,12 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginBottom: 4,
   },
+  instructorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
   courseInstructor: {
     fontSize: 13,
     color: '#0ea5e9',
@@ -271,6 +304,7 @@ const styles = StyleSheet.create({
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
     backgroundColor: '#f8fafc',
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -290,21 +324,42 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   contentContainer: {
-    marginTop: 8,
+    marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#e2e8f0',
   },
   contentLabel: {
-    fontSize: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  contentLabelText: {
+    fontSize: 13,
     fontWeight: '600',
     color: '#0ea5e9',
-    marginBottom: 4,
   },
   contentText: {
     fontSize: 13,
     color: '#64748b',
-    fontStyle: 'italic',
-    lineHeight: 18,
+    lineHeight: 19,
+    marginBottom: 8,
+    paddingLeft: 20,
+  },
+  viewDetailsHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  viewDetailsText: {
+    fontSize: 13,
+    color: '#0ea5e9',
+    fontWeight: '600',
   },
 });

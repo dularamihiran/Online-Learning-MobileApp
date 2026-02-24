@@ -1,5 +1,6 @@
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import API from '@/api/api';
 
@@ -19,6 +20,7 @@ type Course = {
 };
 
 export default function AllCourses() {
+  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<string[]>([]);
@@ -34,7 +36,7 @@ export default function AllCourses() {
     try {
       const res = await API.get('/courses');
       setCourses(res.data);
-    } catch (err) {
+    } catch {
       Alert.alert('Error', 'Failed to fetch courses');
     } finally {
       setLoading(false);
@@ -114,61 +116,71 @@ export default function AllCourses() {
 
           return (
             <View style={styles.card}>
-              <View style={styles.courseHeader}>
-                <Text style={styles.courseTitle}>{item.title}</Text>
-                {item.level && (
-                  <View style={[styles.levelBadge, 
-                    item.level === 'Beginner' && styles.badgeBeginner,
-                    item.level === 'Intermediate' && styles.badgeIntermediate,
-                    item.level === 'Advanced' && styles.badgeAdvanced
-                  ]}>
-                    <Text style={styles.badgeText}>{item.level}</Text>
+              <TouchableOpacity
+                style={styles.cardContent}
+                onPress={() => router.push({
+                  pathname: '/course-details',
+                  params: { course: JSON.stringify(item), isEnrolled: 'false' }
+                } as any)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.courseHeader}>
+                  <Text style={styles.courseTitle}>{item.title}</Text>
+                  {item.level && (
+                    <View style={[styles.levelBadge, 
+                      item.level === 'Beginner' && styles.badgeBeginner,
+                      item.level === 'Intermediate' && styles.badgeIntermediate,
+                      item.level === 'Advanced' && styles.badgeAdvanced
+                    ]}>
+                      <Text style={styles.badgeText}>{item.level}</Text>
+                    </View>
+                  )}
+                </View>
+                
+                <View style={styles.instructorBadge}>
+                  <Ionicons name="person" size={12} color="#0ea5e9" />
+                  <Text style={styles.courseInstructor}>{item.instructor.name}</Text>
+                </View>
+                
+                {(item.category || item.duration || item.price) && (
+                  <View style={styles.metaContainer}>
+                    {item.category && (
+                      <View style={styles.metaItem}>
+                        <Ionicons name="folder-outline" size={12} color="#0ea5e9" />
+                        <Text style={styles.metaText}>{item.category}</Text>
+                      </View>
+                    )}
+                    {item.duration && (
+                      <View style={styles.metaItem}>
+                        <Ionicons name="time-outline" size={12} color="#0ea5e9" />
+                        <Text style={styles.metaText}>{item.duration}</Text>
+                      </View>
+                    )}
+                    {item.price && (
+                      <View style={styles.metaItem}>
+                        <Ionicons name="pricetag-outline" size={12} color="#0ea5e9" />
+                        <Text style={styles.metaText}>{item.price}</Text>
+                      </View>
+                    )}
                   </View>
                 )}
-              </View>
-              
-              <View style={styles.instructorBadge}>
-                <Ionicons name="person" size={12} color="#0ea5e9" />
-                <Text style={styles.courseInstructor}>{item.instructor.name}</Text>
-              </View>
-              
-              {(item.category || item.duration || item.price) && (
-                <View style={styles.metaContainer}>
-                  {item.category && (
-                    <View style={styles.metaItem}>
-                      <Ionicons name="folder-outline" size={12} color="#0ea5e9" />
-                      <Text style={styles.metaText}>{item.category}</Text>
+                
+                <Text style={styles.description} numberOfLines={3}>
+                  {item.description}
+                </Text>
+                {item.content && (
+                  <View style={styles.contentContainer}>
+                    <View style={styles.contentLabel}>
+                      <Ionicons name="document-text-outline" size={14} color="#0ea5e9" />
+                      <Text style={styles.contentLabelText}>Content Preview</Text>
                     </View>
-                  )}
-                  {item.duration && (
-                    <View style={styles.metaItem}>
-                      <Ionicons name="time-outline" size={12} color="#10b981" />
-                      <Text style={styles.metaText}>{item.duration}</Text>
-                    </View>
-                  )}
-                  {item.price && (
-                    <View style={styles.metaItem}>
-                      <Ionicons name="pricetag-outline" size={12} color="#f59e0b" />
-                      <Text style={styles.metaText}>{item.price}</Text>
-                    </View>
-                  )}
-                </View>
-              )}
-              
-              <Text style={styles.description} numberOfLines={3}>
-                {item.description}
-              </Text>
-              {item.content && (
-                <View style={styles.contentContainer}>
-                  <View style={styles.contentLabel}>
-                    <Ionicons name="document-text-outline" size={14} color="#0ea5e9" />
-                    <Text style={styles.contentLabelText}>Content Preview</Text>
+                    <Text style={styles.contentText} numberOfLines={2}>
+                      {item.content}
+                    </Text>
                   </View>
-                  <Text style={styles.contentText} numberOfLines={2}>
-                    {item.content}
-                  </Text>
-                </View>
-              )}
+                )}
+              </TouchableOpacity>
+              
               <TouchableOpacity
                 style={[
                   styles.enrollButton,
@@ -248,6 +260,9 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: '#f1f5f9',
+  },
+  cardContent: {
+    // Content wrapper for touchable area (excludes enroll button)
   },
   courseHeader: {
     marginBottom: 8,

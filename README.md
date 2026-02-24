@@ -1,1 +1,2 @@
-# Online-Learning-MobileApp
+# Online-Learning-MobileApp  - Learnova
+**Learnova** is an AI-powered mobile learning platform that connects students and instructors through intelligent course recommendations and seamless learning experiences.
