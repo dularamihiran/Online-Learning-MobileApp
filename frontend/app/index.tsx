@@ -9,9 +9,13 @@ export default function LandingPage() {
     <View style={styles.container}>
       {/* Hero Section */}
       <View style={styles.hero}>
-        <Text style={styles.title}>AI Learning Platform</Text>
+        <View style={styles.logoContainer}>
+          <Ionicons name="school" size={64} color="#3498db" />
+        </View>
+        <Text style={styles.appName}>Learnova</Text>
+        <Text style={styles.tagline}>Your Smart Learning Companion</Text>
         <Text style={styles.subtitle}>
-          Smart course recommendations powered by AI.{'\n'}
+          AI-powered course recommendations.{' \n'}
           Learn anytime, anywhere.
         </Text>
       </View>
@@ -19,16 +23,16 @@ export default function LandingPage() {
       {/* Features */}
       <View style={styles.featuresContainer}>
         <View style={styles.featureCard}>
-          <Ionicons name="sparkles" size={32} color="#0ea5e9" />
-          <Text style={styles.featureText}>AI Course Suggestions</Text>
+          <Ionicons name="sparkles" size={32} color="#3498db" />
+          <Text style={styles.featureText}>AI Powered</Text>
         </View>
         <View style={styles.featureCard}>
-          <Ionicons name="book" size={32} color="#0ea5e9" />
+          <Ionicons name="book" size={32} color="#3498db" />
           <Text style={styles.featureText}>Smart Learning</Text>
         </View>
         <View style={styles.featureCard}>
-          <Ionicons name="phone-portrait" size={32} color="#0ea5e9" />
-          <Text style={styles.featureText}>Mobile Platform</Text>
+          <Ionicons name="phone-portrait" size={32} color="#3498db" />
+          <Text style={styles.featureText}>Mobile First</Text>
         </View>
       </View>
 
@@ -64,6 +68,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 40,
   },
+  logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e3f2fd',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  appName: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    color: '#3498db',
+    textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: 1,
+  },
+  tagline: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -97,11 +125,11 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   loginButton: {
-    backgroundColor: '#0ea5e9',
+    backgroundColor: '#3498db',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#0ea5e9',
+    shadowColor: '#3498db',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -117,11 +145,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#0ea5e9',
+    borderColor: '#3498db',
     alignItems: 'center',
   },
   registerButtonText: {
-    color: '#0ea5e9',
+    color: '#3498db',
     fontSize: 18,
     fontWeight: 'bold',
   },

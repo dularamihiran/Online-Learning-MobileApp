@@ -13,28 +13,28 @@ export default function StudentDashboard() {
       icon: 'book-outline',
       title: 'Browse Courses',
       subtitle: 'Explore available courses',
-      color: '#0ea5e9',
+      color: '#3498db',
       route: '/(student)/all-courses' as any,
     },
     {
       icon: 'bookmarks-outline',
       title: 'My Courses',
       subtitle: 'View enrolled courses',
-      color: '#10b981',
+      color: '#3498db',
       route: '/(student)/my-courses' as any,
     },
     {
       icon: 'sparkles-outline',
       title: 'AI Advisor',
       subtitle: 'Get course recommendations',
-      color: '#f59e0b',
+      color: '#3498db',
       route: '/(student)/chatgpt-suggestions' as any,
     },
     {
       icon: 'person-outline',
       title: 'My Profile',
       subtitle: 'View profile & settings',
-      color: '#8b5cf6',
+      color: '#3498db',
       route: '/(student)/profile' as any,
     },
   ];
@@ -45,7 +45,7 @@ export default function StudentDashboard() {
       <View style={styles.welcomeSection}>
         <View style={styles.welcomeCard}>
           <View style={styles.avatarContainer}>
-            <Ionicons name="person" size={32} color="#0ea5e9" />
+            <Ionicons name="person" size={32} color="#3498db" />
           </View>
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeSubtitle}>Welcome back,</Text>
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#dbeafe',
+    backgroundColor: '#e3f2fd',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
