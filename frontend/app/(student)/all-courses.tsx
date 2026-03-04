@@ -1,23 +1,10 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import API from '@/api/api';
-
-type Course = {
-  _id: string;
-  title: string;
-  description: string;
-  content?: string;
-  category?: string;
-  level?: string;
-  duration?: string;
-  price?: string;
-  instructor: {
-    _id: string;
-    name: string;
-  };
-};
+import CourseCard from '@/components/CourseCard';
+import { Course } from '@/types/course';
 
 export default function AllCourses() {
   const router = useRouter();
@@ -111,97 +98,18 @@ export default function AllCourses() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0ea5e9"]} />
         }
-        renderItem={({ item }) => {
-          const isEnrolling = enrolling === item._id;
-
-          return (
-            <View style={styles.card}>
-              <TouchableOpacity
-                style={styles.cardContent}
-                onPress={() => router.push({
-                  pathname: '/course-details',
-                  params: { course: JSON.stringify(item), isEnrolled: 'false' }
-                } as any)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.courseHeader}>
-                  <Text style={styles.courseTitle}>{item.title}</Text>
-                  {item.level && (
-                    <View style={[styles.levelBadge, 
-                      item.level === 'Beginner' && styles.badgeBeginner,
-                      item.level === 'Intermediate' && styles.badgeIntermediate,
-                      item.level === 'Advanced' && styles.badgeAdvanced
-                    ]}>
-                      <Text style={styles.badgeText}>{item.level}</Text>
-                    </View>
-                  )}
-                </View>
-                
-                <View style={styles.instructorBadge}>
-                  <Ionicons name="person" size={12} color="#0ea5e9" />
-                  <Text style={styles.courseInstructor}>{item.instructor.name}</Text>
-                </View>
-                
-                {(item.category || item.duration || item.price) && (
-                  <View style={styles.metaContainer}>
-                    {item.category && (
-                      <View style={styles.metaItem}>
-                        <Ionicons name="folder-outline" size={12} color="#0ea5e9" />
-                        <Text style={styles.metaText}>{item.category}</Text>
-                      </View>
-                    )}
-                    {item.duration && (
-                      <View style={styles.metaItem}>
-                        <Ionicons name="time-outline" size={12} color="#0ea5e9" />
-                        <Text style={styles.metaText}>{item.duration}</Text>
-                      </View>
-                    )}
-                    {item.price && (
-                      <View style={styles.metaItem}>
-                        <Ionicons name="pricetag-outline" size={12} color="#0ea5e9" />
-                        <Text style={styles.metaText}>{item.price}</Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-                
-                <Text style={styles.description} numberOfLines={3}>
-                  {item.description}
-                </Text>
-                {item.content && (
-                  <View style={styles.contentContainer}>
-                    <View style={styles.contentLabel}>
-                      <Ionicons name="document-text-outline" size={14} color="#0ea5e9" />
-                      <Text style={styles.contentLabelText}>Content Preview</Text>
-                    </View>
-                    <Text style={styles.contentText} numberOfLines={2}>
-                      {item.content}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[
-                  styles.enrollButton,
-                  isEnrolling && styles.enrollingButton,
-                ]}
-                onPress={() => handleEnroll(item._id)}
-                disabled={isEnrolling}
-                activeOpacity={0.8}
-              >
-                <Ionicons 
-                  name={isEnrolling ? "hourglass-outline" : "checkmark-circle"} 
-                  size={18} 
-                  color="#fff" 
-                />
-                <Text style={styles.enrollButtonText}>
-                  {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          );
-        }}
+        renderItem={({ item }) => (
+          <CourseCard
+            course={item}
+            isEnrolled={false}
+            isEnrolling={enrolling === item._id}
+            onPress={() => router.push({
+              pathname: '/course-details',
+              params: { course: JSON.stringify(item), isEnrolled: 'false' }
+            } as any)}
+            onEnroll={() => handleEnroll(item._id)}
+          />
+        )}
       />
     </View>
   );
@@ -247,145 +155,5 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 18,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
-  },
-  cardContent: {
-    // Content wrapper for touchable area (excludes enroll button)
-  },
-  courseHeader: {
-    marginBottom: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  courseTitle: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    color: '#0f172a',
-    flex: 1,
-    marginRight: 8,
-  },
-  levelBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeBeginner: {
-    backgroundColor: '#d1fae5',
-  },
-  badgeIntermediate: {
-    backgroundColor: '#fed7aa',
-  },
-  badgeAdvanced: {
-    backgroundColor: '#fecaca',
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  instructorBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#e0f2fe',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  courseInstructor: {
-    fontSize: 13,
-    color: '#0ea5e9',
-    fontWeight: '600',
-  },
-  metaContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#f8fafc',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  metaText: {
-    fontSize: 12,
-    color: '#475569',
-    fontWeight: '500',
-  },
-  description: {
-    fontSize: 14,
-    color: '#475569',
-    lineHeight: 21,
-    marginBottom: 8,
-  },
-  contentContainer: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
-  },
-  contentLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 8,
-  },
-  contentLabelText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#0ea5e9',
-  },
-  contentText: {
-    fontSize: 13,
-    color: '#64748b',
-    lineHeight: 19,
-    marginBottom: 12,
-    paddingLeft: 20,
-  },
-  enrollButton: {
-    backgroundColor: '#0ea5e9',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 8,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    shadowColor: '#0ea5e9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  enrollingButton: {
-    backgroundColor: '#7dd3fc',
-  },
-  enrollButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
   },
 });
