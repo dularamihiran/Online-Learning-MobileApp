@@ -1,24 +1,15 @@
-// Add authentication redirect logic using AuthContext.
-// Requirements:
-// - On app load, check token & role.
-// - If logged in:
-//     student -> /(student)
-//     instructor -> /(instructor)
-// - If not logged in -> /(auth)/login.
-// - Prevent screen flicker using loading screen.
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useContext, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, AuthContext } from '@/context/AuthContext';
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
   const { token, user, loading } = useContext(AuthContext);
   const segments = useSegments();
   const router = useRouter();
@@ -53,7 +44,7 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack screenOptions={{ headerShown: false }} />
       <StatusBar style="auto" />
     </ThemeProvider>
